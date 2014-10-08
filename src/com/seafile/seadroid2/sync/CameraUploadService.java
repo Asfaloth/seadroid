@@ -25,9 +25,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.seafile.seadroid2.AccountsActivity;
-import com.seafile.seadroid2.BrowserActivity;
 import com.seafile.seadroid2.ConcurrentAsyncTask;
 import com.seafile.seadroid2.SeafException;
+import com.seafile.seadroid2.SettingsManager;
 import com.seafile.seadroid2.account.Account;
 import com.seafile.seadroid2.data.SeafCachedPhoto;
 import com.seafile.seadroid2.transfer.PendingUploadInfo;
@@ -205,7 +205,7 @@ public class CameraUploadService extends Service {
 
     private boolean checkNetworkStatus() {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        isAllowMobileConnections = settings.getBoolean(BrowserActivity.ALLOW_MOBILE_CONNECTIONS_SWITCH_KEY, false);
+        isAllowMobileConnections = settings.getBoolean(SettingsManager.ALLOW_MOBILE_CONNECTIONS_SWITCH_KEY, false);
         if (!Utils.isNetworkOn()) {
             return false;
         }

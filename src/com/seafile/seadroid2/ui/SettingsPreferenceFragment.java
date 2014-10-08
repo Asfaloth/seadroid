@@ -19,8 +19,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.seafile.seadroid2.AccountsActivity;
-import com.seafile.seadroid2.BrowserActivity;
 import com.seafile.seadroid2.R;
+import com.seafile.seadroid2.SettingsManager;
 import com.seafile.seadroid2.account.Account;
 import com.seafile.seadroid2.sync.CameraUploadService;
 import com.seafile.seadroid2.transfer.TransferService;
@@ -43,6 +43,7 @@ public class SettingsPreferenceFragment
     public static final String SHARED_PREF_CAMERA_UPLOAD_SETTINGS_START = PKG + ".camera.settings.startService";
     public static final int CHOOSE_CAMERA_UPLOAD_REPO_REQUEST = 1;
     private static final int GESTURE_LOCK_REQUEST = 6;
+    public static final String CAMERA_UPLOAD_REPO_KEY = "camera_upload_repo_key";
     private CheckBoxPreference gestureLockSwitch;
     private CheckBoxPreference cameraUploadSwitch;
     private CheckBoxPreference allowMobileConnections;
@@ -56,26 +57,28 @@ public class SettingsPreferenceFragment
     private boolean isUploadStart;
     private Intent mCameraUploadRepoChooserData;
     private String repoName;
+    private SettingsManager settingsMgr;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(DEBUG_TAG, "onCreate");
         addPreferencesFromResource(R.xml.settings);
 
+        settingsMgr = SettingsManager.instance();
+        
+
         mActivity = (SettingsActivity) getActivity();
         sharedPref = mActivity.getSharedPreferences(AccountsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         editor = sharedPref.edit();
 
-        gestureLockSwitch = (CheckBoxPreference) findPreference(BrowserActivity.GESTURE_LOCK_SWITCH_KEY);
-        cameraUploadSwitch = (CheckBoxPreference) findPreference(BrowserActivity.CAMERA_UPLOAD_SWITCH_KEY);
-        allowMobileConnections = (CheckBoxPreference) findPreference(BrowserActivity.ALLOW_MOBILE_CONNECTIONS_SWITCH_KEY);
-        cameraUploadRepo = (Preference) findPreference(BrowserActivity.CAMERA_UPLOAD_REPO_KEY);
+        gestureLockSwitch = (CheckBoxPreference) findPreference(SettingsManager.GESTURE_LOCK_SWITCH_KEY);
+        cameraUploadSwitch = (CheckBoxPreference) findPreference(SettingsManager.CAMERA_UPLOAD_SWITCH_KEY);
+        allowMobileConnections = (CheckBoxPreference) findPreference(SettingsManager.ALLOW_MOBILE_CONNECTIONS_SWITCH_KEY);
+        cameraUploadRepo = (Preference) findPreference(CAMERA_UPLOAD_REPO_KEY);
         gestureLockSwitch.setOnPreferenceChangeListener(this);
         gestureLockSwitch.setOnPreferenceClickListener(this);
 
-        if (sharedPref.getBoolean(BrowserActivity.GESTURE_LOCK_SWITCH_KEY, false)) {
-            gestureLockSwitch.setChecked(true);
-        }
+        gestureLockSwitch.setChecked(settingsMgr.isGestureLockEnabled());
 
         cameraUploadSwitch.setOnPreferenceClickListener(this);
         allowMobileConnections.setOnPreferenceClickListener(this);
@@ -125,8 +128,8 @@ public class SettingsPreferenceFragment
     @Override
     public boolean onPreferenceClick(Preference preference) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
-        if (preference.getKey().equals(BrowserActivity.GESTURE_LOCK_SWITCH_KEY)) {
-            gestureLockBefore = settings.getBoolean(BrowserActivity.GESTURE_LOCK_SWITCH_KEY, false);
+        if (preference.getKey().equals(SettingsManager.GESTURE_LOCK_SWITCH_KEY)) {
+            gestureLockBefore = settings.getBoolean(SettingsManager.GESTURE_LOCK_SWITCH_KEY, false);
 
             if (gestureLockBefore == false) {
                 Intent newIntent = new Intent(getActivity(), GestureLockSetupActivity.class);
@@ -135,13 +138,13 @@ public class SettingsPreferenceFragment
 
             } else {
                 SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean(BrowserActivity.GESTURE_LOCK_SWITCH_KEY, false);
-                editor.putString(BrowserActivity.LOCK_KEY, null);
+                editor.putBoolean(SettingsManager.GESTURE_LOCK_SWITCH_KEY, false);
+                editor.putString(SettingsManager.LOCK_KEY, null);
                 editor.commit();
                 gestureLockSwitch.setChecked(false);
             }
-        } else if (preference.getKey().equals(BrowserActivity.CAMERA_UPLOAD_SWITCH_KEY)) {
-            isUploadStart = settings.getBoolean(BrowserActivity.CAMERA_UPLOAD_SWITCH_KEY, false);
+        } else if (preference.getKey().equals(SettingsManager.CAMERA_UPLOAD_SWITCH_KEY)) {
+            isUploadStart = settings.getBoolean(SettingsManager.CAMERA_UPLOAD_SWITCH_KEY, false);
             if (!isUploadStart) {
                 cameraUploadRepo.setEnabled(false);
                 allowMobileConnections.setEnabled(false);
@@ -151,9 +154,9 @@ public class SettingsPreferenceFragment
                 cameraUploadRepo.setEnabled(true);
                 startCameraUploadService(true);
             }
-        } else if (preference.getKey().equals(BrowserActivity.ALLOW_MOBILE_CONNECTIONS_SWITCH_KEY)) {
+        } else if (preference.getKey().equals(SettingsManager.ALLOW_MOBILE_CONNECTIONS_SWITCH_KEY)) {
             // no task here
-        } else if (preference.getKey().equals(BrowserActivity.CAMERA_UPLOAD_REPO_KEY)) {
+        } else if (preference.getKey().equals(CAMERA_UPLOAD_REPO_KEY)) {
             // Pop-up window to let user choose remote library
             Intent intent = new Intent(mActivity, SeafilePathChooserActivity.class);
             intent.putExtra(EXTRA_CAMERA_UPLOAD, true);
@@ -188,10 +191,10 @@ public class SettingsPreferenceFragment
 
                 if (setupSuccess == true) {
                     showToast(R.string.setup_gesture_lock_success);
-                    editor.putBoolean(BrowserActivity.GESTURE_LOCK_SWITCH_KEY, true);
+                    editor.putBoolean(SettingsManager.GESTURE_LOCK_SWITCH_KEY, true);
                     gestureLockSwitch.setChecked(true);
                 } else {
-                    editor.putBoolean(BrowserActivity.GESTURE_LOCK_SWITCH_KEY, false);
+                    editor.putBoolean(SettingsManager.GESTURE_LOCK_SWITCH_KEY, false);
                     gestureLockSwitch.setChecked(false);
                 }
 

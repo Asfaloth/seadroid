@@ -26,12 +26,12 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.seafile.seadroid2.AccountAdapter;
-import com.seafile.seadroid2.BrowserActivity;
 import com.seafile.seadroid2.ConcurrentAsyncTask;
 import com.seafile.seadroid2.NavContext;
 import com.seafile.seadroid2.R;
 import com.seafile.seadroid2.SeafConnection;
 import com.seafile.seadroid2.SeafException;
+import com.seafile.seadroid2.SettingsManager;
 import com.seafile.seadroid2.account.Account;
 import com.seafile.seadroid2.account.AccountManager;
 import com.seafile.seadroid2.data.DataManager;
@@ -100,7 +100,7 @@ public class SeafilePathChooserActivity extends SherlockFragmentActivity {
             canChooseAccount = true;
             
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            String lockPattenString = settings.getString(BrowserActivity.LOCK_KEY, null);
+            String lockPattenString = settings.getString(SettingsManager.LOCK_KEY, null);
             if (lockPattenString != null) {
                 Intent newIntent = new Intent(this, GestureLockActivity.class);
                 startActivity(newIntent);
